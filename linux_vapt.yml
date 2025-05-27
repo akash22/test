@@ -80,7 +80,7 @@
           loop:
             - ',diffie-hellman-group-exchange-sha1'
             - ',diffie-hellman-group14-sha1'
-      when: selected_option | trim | upper in ['SHA1', 'All']
+      when:  selected_option[0] | trim | lower in ['sha1', 'all']
 
     - name: Apply deprecated SSH crypto settings removal
       block:
