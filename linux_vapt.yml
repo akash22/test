@@ -84,10 +84,19 @@
 
     - name: Apply deprecated SSH crypto settings removal
       block:
-        - name: Remove deprecated CBC ciphers
+        - name: Remove deprecated CBC ciphers - aes128-cbc
           replace:
             path: "{{ item }}"
-            regexp: ",aes(128|256)-cbc"
+            regexp: ",aes128-cbc"
+            replace: ""
+          loop:
+            - /usr/share/crypto-policies/DEFAULT/openssh.txt
+            - /usr/share/crypto-policies/DEFAULT/opensshserver.txt
+            - /usr/share/crypto-policies/DEFAULT/libssh.txt
+        - name: Remove deprecated CBC ciphers - aes256-cbc
+          replace:
+            path: "{{ item }}"
+            regexp: ",aes256-cbc"
             replace: ""
           loop:
             - /usr/share/crypto-policies/DEFAULT/openssh.txt
