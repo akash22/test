@@ -34,12 +34,12 @@
 
   tasks:
 
-    - name: Copy source file to target (if provided)
-      copy:
-        src: "{{ source_file_path }}"
-        dest: /tmp/ssh_hardening_script.sh
-        mode: '0755'
-      when: source_file_path != ""
+#    - name: Copy source file to target (if provided)
+#      copy:
+#        src: "{{ source_file_path }}"
+#        dest: /tmp/ssh_hardening_script.sh
+#        mode: '0755'
+#      when: source_file_path != ""
 
     - name: Apply SHA1 deprecation settings
       block:
