@@ -78,7 +78,7 @@
           loop:
             - ',diffie-hellman-group-exchange-sha1'
             - ',diffie-hellman-group14-sha1'
-      when: selected_option in ['SHA1', 'All']
+      when: selected_option | trim | upper in ['SHA1', 'All']
 
     - name: Apply deprecated SSH crypto settings removal
       block:
@@ -91,7 +91,7 @@
             - /usr/share/crypto-policies/DEFAULT/openssh.txt
             - /usr/share/crypto-policies/DEFAULT/opensshserver.txt
             - /usr/share/crypto-policies/DEFAULT/libssh.txt
-      when: selected_option in ['deprecated_crypto', 'All']
+      when: selected_option | trim | upper in ['deprecated_crypto', 'All']
 
     - name: Apply Terrapin CVE-2023-48795 mitigation
       block:
@@ -104,13 +104,13 @@
             - /usr/share/crypto-policies/DEFAULT/openssh.txt
             - /usr/share/crypto-policies/DEFAULT/opensshserver.txt
             - /usr/share/crypto-policies/DEFAULT/libssh.txt
-      when: selected_option in ['Terrapin', 'All']
+      when: selected_option | trim | upper in ['Terrapin', 'All']
 
     - name: Restart sshd if changes made
       service:
         name: sshd
         state: restarted
-      when: selected_option in ['SHA1', 'deprecated_crypto', 'Terrapin', 'All']
+      when: selected_option | trim | upper in ['SHA1', 'deprecated_crypto', 'Terrapin', 'All']
 
     - name: Send notification
       debug:
