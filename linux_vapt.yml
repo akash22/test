@@ -1,0 +1,118 @@
+---
+- name: Read server list and add dynamic hosts
+  hosts: localhost
+  gather_facts: no
+  vars:
+    source_file_path: "/tmp/ssh_hardening_script.sh"
+    selected_option: "All"  # Options: SHA1, deprecated_crypto, Terrapin, All
+    notify: true
+    server_list_file: "server_list.txt"
+
+  tasks:
+    - name: Read IPs from server list file
+      slurp:
+        src: "{{ server_list_file }}"
+      register: slurped_file
+
+    - name: Set list of IPs
+      set_fact:
+        server_ips: "{{ slurped_file['content'] | b64decode | splitlines() }}"
+
+    - name: Add hosts to dynamic group
+      add_host:
+        name: "{{ item }}"
+        groups: dynamic_targets
+      loop: "{{ server_ips }}"
+
+- name: Apply SSH hardening on dynamic hosts
+  hosts: dynamic_targets
+  become: yes
+  vars:
+    source_file_path: "/tmp/ssh_hardening_script.sh"
+    selected_option: "All"
+    notify: true
+
+  tasks:
+
+    - name: Copy source file to target (if provided)
+      copy:
+        src: "{{ source_file_path }}"
+        dest: /tmp/ssh_hardening_script.sh
+        mode: '0755'
+      when: source_file_path != ""
+
+    - name: Apply SHA1 deprecation settings
+      block:
+        - name: Remove SHA1 algorithms from openssh.txt
+          replace:
+            path: "/usr/share/crypto-policies/DEFAULT/openssh.txt"
+            regexp: "{{ item }}"
+            replace: ""
+          loop:
+            - 'hmac-sha1-etm@openssh.com,?'
+            - 'hmac-sha1,?'
+            - ',gss-gex-sha1-,gss-group14-sha1-'
+            - ',diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1'
+
+        - name: Remove SHA1 from opensshserver.txt and libssh.txt
+          replace:
+            path: "{{ item.0 }}"
+            regexp: "{{ item.1 }}"
+            replace: ""
+          loop: >
+            {{
+              ['/usr/share/crypto-policies/DEFAULT/opensshserver.txt',
+               '/usr/share/crypto-policies/DEFAULT/libssh.txt'] | product(
+                ['hmac-sha1-etm@openssh.com,?',
+                 'hmac-sha1,?',
+                 ',gss-gex-sha1-,gss-group14-sha1-',
+                 ',diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1']
+              ) | list
+            }}
+
+        - name: Remove key exchange settings from sshd_config
+          replace:
+            path: /etc/ssh/sshd_config
+            regexp: "{{ item }}"
+            replace: ""
+          loop:
+            - ',diffie-hellman-group-exchange-sha1'
+            - ',diffie-hellman-group14-sha1'
+      when: selected_option in ['SHA1', 'All']
+
+    - name: Apply deprecated SSH crypto settings removal
+      block:
+        - name: Remove deprecated CBC ciphers
+          replace:
+            path: "{{ item }}"
+            regexp: ",aes(128|256)-cbc"
+            replace: ""
+          loop:
+            - /usr/share/crypto-policies/DEFAULT/openssh.txt
+            - /usr/share/crypto-policies/DEFAULT/opensshserver.txt
+            - /usr/share/crypto-policies/DEFAULT/libssh.txt
+      when: selected_option in ['deprecated_crypto', 'All']
+
+    - name: Apply Terrapin CVE-2023-48795 mitigation
+      block:
+        - name: Remove chacha20-poly1305 from config files
+          replace:
+            path: "{{ item }}"
+            regexp: ",chacha20-poly1305@openssh.com"
+            replace: ""
+          loop:
+            - /usr/share/crypto-policies/DEFAULT/openssh.txt
+            - /usr/share/crypto-policies/DEFAULT/opensshserver.txt
+            - /usr/share/crypto-policies/DEFAULT/libssh.txt
+      when: selected_option in ['Terrapin', 'All']
+
+    - name: Restart sshd if changes made
+      service:
+        name: sshd
+        state: restarted
+      when: selected_option in ['SHA1', 'deprecated_crypto', 'Terrapin', 'All']
+
+    - name: Send notification
+      debug:
+        msg: "SSH hardening applied on {{ inventory_hostname }}"
+      when: notify
