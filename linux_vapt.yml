@@ -2,11 +2,11 @@
 - name: Read server list and add dynamic hosts
   hosts: localhost
   gather_facts: no
-  vars:
-    source_file_path: "/tmp/ssh_hardening_script.sh"
-    selected_option: "All"  # Options: SHA1, deprecated_crypto, Terrapin, All
-    notify: true
-    server_list_file: "server_list.txt"
+#  vars:
+#    source_file_path: "/tmp/ssh_hardening_script.sh"
+#    selected_option: "All"  # Options: SHA1, deprecated_crypto, Terrapin, All
+#    notify: true
+#    server_list_file: "server_list.txt"
 
   tasks:
     - name: Read IPs from server list file
@@ -27,10 +27,10 @@
 - name: Apply SSH hardening on dynamic hosts
   hosts: dynamic_targets
   become: yes
-  vars:
-    source_file_path: "/tmp/ssh_hardening_script.sh"
-    selected_option: "All"
-    notify: true
+ # vars:
+ #   source_file_path: "/tmp/ssh_hardening_script.sh"
+ #   selected_option: "All"
+ #   notify: true
 
   tasks:
 
