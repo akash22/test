@@ -40,7 +40,9 @@
 #        dest: /tmp/ssh_hardening_script.sh
 #        mode: '0755'
 #      when: source_file_path != ""
-
+    - name: Debug selected_option
+      debug:
+         msg: "selected_option = {{ selected_option | string | trim | repr }}"
     - name: Apply SHA1 deprecation settings
       block:
         - name: Remove SHA1 algorithms from openssh.txt
