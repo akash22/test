@@ -16,7 +16,7 @@
 
     - name: Set list of IPs
       set_fact:
-        server_ips: "{{ (slurped_file.content | b64decode).split('\n') | map('trim') | reject('equalto', '') | list }}""
+        server_ips: "{{ (slurped_file.content | b64decode).split('\n') | map('trim') | reject('equalto', '') | list }}"
 
     - name: Add hosts to dynamic group
       add_host:
