@@ -96,7 +96,7 @@
         - name: Remove deprecated CBC ciphers - aes256-cbc
           replace:
             path: "{{ item }}"
-            regexp: ',aes256-cbc'
+            regexp: ',?aes256-cbc'
             replace: ''
           loop:
             - /usr/share/crypto-policies/DEFAULT/openssh.txt
