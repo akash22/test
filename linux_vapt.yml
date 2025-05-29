@@ -87,8 +87,8 @@
         - name: Remove deprecated CBC ciphers - aes128-cbc
           replace:
             path: "{{ item }}"
-            regexp: ",aes128-cbc"
-            replace: ""
+            regexp: ',?aes128-cbc'
+            replace: ''
           loop:
             - /usr/share/crypto-policies/DEFAULT/openssh.txt
             - /usr/share/crypto-policies/DEFAULT/opensshserver.txt
@@ -96,8 +96,8 @@
         - name: Remove deprecated CBC ciphers - aes256-cbc
           replace:
             path: "{{ item }}"
-            regexp: ",aes256-cbc"
-            replace: ""
+            regexp: ',aes256-cbc'
+            replace: ''
           loop:
             - /usr/share/crypto-policies/DEFAULT/openssh.txt
             - /usr/share/crypto-policies/DEFAULT/opensshserver.txt
