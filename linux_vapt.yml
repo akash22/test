@@ -121,7 +121,7 @@
             - /usr/share/crypto-policies/DEFAULT/openssh.txt
             - /usr/share/crypto-policies/DEFAULT/opensshserver.txt
             - /usr/share/crypto-policies/DEFAULT/libssh.txt
-      when: selected_option[0] | trim | lower in ['Terrapin', 'All']
+      when: selected_option[0] | trim | lower in ['Terrapin', 'all']
 
 #    - name: Restart sshd if changes made
 #      service:
