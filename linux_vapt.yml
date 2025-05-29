@@ -117,11 +117,11 @@
             - /usr/share/crypto-policies/DEFAULT/libssh.txt
       when: selected_option[0] | trim | lower in ['Terrapin', 'All']
 
-    - name: Restart sshd if changes made
-      service:
-        name: sshd
-        state: restarted
-      when: selected_option[0] | trim | lower in ['SHA1', 'deprecated_crypto', 'Terrapin', 'All']
+#    - name: Restart sshd if changes made
+#      service:
+#        name: sshd
+#        state: restarted
+#      when: selected_option[0] | trim | lower in ['SHA1', 'deprecated_crypto', 'Terrapin', 'All']
 
     - name: Send notification
       debug:
