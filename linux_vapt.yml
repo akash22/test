@@ -84,26 +84,27 @@
 
     - name: Apply deprecated SSH crypto settings removal
       block:
-        - name: Remove deprecated CBC ciphers - aes128-cbc
+        - name: Remove deprecated CBC ciphers (aes128-cbc and aes256-cbc)
+          replace:
+            path: "{{ item.0 }}"
+            regexp: '(^|,)(aes128-cbc|aes256-cbc)(?=,|$)'
+            replace: ''
+          loop: "{{ deprecated_crypto_files | product(['aes128-cbc', 'aes256-cbc']) | list }}"
+          vars:
+            deprecated_crypto_files:
+              - /usr/share/crypto-policies/DEFAULT/openssh.txt
+              - /usr/share/crypto-policies/DEFAULT/opensshserver.txt
+              - /usr/share/crypto-policies/DEFAULT/libssh.txt
+    
+        - name: Clean up double commas after cipher removal
           replace:
             path: "{{ item }}"
-            regexp: '(^aes128-cbc,|,aes128-cbc,|,aes128-cbc$|^aes128-cbc$)'
-            replace: ''
-          loop:
-            - /usr/share/crypto-policies/DEFAULT/openssh.txt
-            - /usr/share/crypto-policies/DEFAULT/opensshserver.txt
-            - /usr/share/crypto-policies/DEFAULT/libssh.txt
-        - name: Remove deprecated CBC ciphers - aes256-cbc
-          replace:
-            path: "{{ item }}"
-            regexp: '(^aes256-cbc,|,aes256-cbc,|,aes256-cbc$|^aes256-cbc$)'
-            replace: ''
-          loop:
-            - /usr/share/crypto-policies/DEFAULT/openssh.txt
-            - /usr/share/crypto-policies/DEFAULT/opensshserver.txt
-            - /usr/share/crypto-policies/DEFAULT/libssh.txt
-      when: selected_option[0] | trim | lower in ['deprecated_crypto', 'All']
+            regexp: ',,'
+            replace: ','
+          loop: "{{ deprecated_crypto_files }}"
+      when: selected_option[0] | trim | lower in ['deprecated_crypto', 'all']
 
+    
     - name: Apply Terrapin CVE-2023-48795 mitigation
       block:
         - name: Remove chacha20-poly1305 from config files
