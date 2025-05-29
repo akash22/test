@@ -102,6 +102,11 @@
             regexp: ',,'
             replace: ','
           loop: "{{ deprecated_crypto_files }}"
+          vars:
+            deprecated_crypto_files:
+              - /usr/share/crypto-policies/DEFAULT/openssh.txt
+              - /usr/share/crypto-policies/DEFAULT/opensshserver.txt
+              - /usr/share/crypto-policies/DEFAULT/libssh.txt
       when: selected_option[0] | trim | lower in ['deprecated_crypto', 'all']
 
     
