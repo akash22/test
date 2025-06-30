@@ -1,8 +1,8 @@
----
-- name: Check if swap is properly configured
-  hosts: all
-  gather_facts: no
-  roles:
-    - linux_parameters/roles/kdump
-    - linux_parameters/roles/swap
-    - linux_parameters/roles/build_report
+#---
+#- name: Check if swap is properly configured
+#  hosts: all
+##  gather_facts: no
+ # roles:
+ #   - linux_parameters/roles/kdump
+ #   - linux_parameters/roles/swap
+ #   - linux_parameters/roles/build_report
