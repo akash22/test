@@ -9,15 +9,30 @@
 #    server_list_file: "server_list.txt"
 
   tasks:
+
+    - name: Fail if no input provided
+      fail:
+        msg: "No server input provided. Please use either a file or provide IPs manually."
+      when: (server_input_type == 'file' and (server_list_file | trim == '')) or
+            (server_input_type == 'manual' and (target_ips | trim == ''))
+
+  
     - name: Read IPs from server list file
       slurp:
         src: "{{ server_list_file }}"
       register: slurped_file
-
+      when: server_input_type == 'file'
+      
     - name: Set list of IPs
       set_fact:
         server_ips: "{{ (slurped_file.content | b64decode).split('\n') | map('trim') | reject('equalto', '') | list }}"
-
+      when: server_input_type == 'file'
+      
+    - name: Set server list from manual input
+      set_fact:
+        server_ips: "{{ target_ips.split(',') | map('trim') | reject('equalto', '') | list }}"
+      when: server_input_type == 'manual'
+      
     - name: Add hosts to dynamic group
       add_host:
         name: "{{ item }}"
